@@ -1,0 +1,43 @@
+services:
+  traefik:
+    # Synthetic forwarded addresses are accepted only in the integration stack.
+    command:
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.forwardedheaders.insecure=true
+      - --providers.file.filename=/etc/traefik/dynamic.yml
+      - --experimental.localplugins.abuseipdb.modulename=github.com/your-org/abuseipdb-traefik-bouncer
+      - --ping=true
+    environment:
+      SSL_CERT_FILE: /certs/ca.pem
+      HTTP_PROXY: ""
+      HTTPS_PROXY: ""
+      ALL_PROXY: ""
+    volumes:
+      - ./tests/dynamic.yml:/etc/traefik/dynamic.yml:ro
+      - stub-certs:/certs:ro
+    depends_on:
+      stub:
+        condition: service_healthy
+  stub:
+    image: golang:1.23-bookworm
+    working_dir: /stub
+    command: [go, run, main.go]
+    volumes:
+      - ./tests/stub:/stub:ro
+      - stub-certs:/certs
+    networks:
+      default:
+        aliases: [api.abuseipdb.com]
+    healthcheck:
+      test: [CMD, test, -f, /certs/ready]
+      interval: 2s
+      timeout: 2s
+      retries: 90
+  probe:
+    image: curlimages/curl:8.12.1
+    entrypoint: [sh, /tests/assert.sh]
+    volumes:
+      - ./tests:/tests:ro
+    profiles: [test]
+volumes:
+  stub-certs:

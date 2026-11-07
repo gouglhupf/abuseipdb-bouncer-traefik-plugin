@@ -1,0 +1,50 @@
+# Test-only: trust synthetic XFF from the probe container. NEVER use this trust-all
+# setting in production. The normal playground ignores XFF.
+http:
+  routers:
+    live:
+      rule: PathPrefix(`/`)
+      entryPoints: [web]
+      middlewares: [live]
+      service: whoami
+    closed:
+      rule: PathPrefix(`/closed`)
+      entryPoints: [web]
+      middlewares: [closed]
+      service: whoami
+    category:
+      rule: PathPrefix(`/category`)
+      entryPoints: [web]
+      middlewares: [category]
+      service: whoami
+  services:
+    whoami:
+      loadBalancer:
+        servers:
+          - url: http://whoami:80
+  middlewares:
+    live:
+      plugin:
+        abuseipdb:
+          apiKey: integration-secret
+          useBlacklist: false
+          trustedProxies: ["0.0.0.0/0", "::/0"]
+          allowCIDRs: ["203.0.113.1/32"]
+          denyCIDRs: ["203.0.113.0/24"]
+          maxRetries: 0
+    closed:
+      plugin:
+        abuseipdb:
+          apiKey: integration-secret
+          useBlacklist: false
+          trustedProxies: ["0.0.0.0/0", "::/0"]
+          failClosed: true
+          maxRetries: 0
+    category:
+      plugin:
+        abuseipdb:
+          apiKey: integration-secret
+          useBlacklist: false
+          trustedProxies: ["0.0.0.0/0", "::/0"]
+          blockCategories: [18]
+          maxRetries: 0

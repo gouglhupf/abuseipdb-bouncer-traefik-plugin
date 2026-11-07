@@ -1,0 +1,20 @@
+services:
+  traefik:
+    image: traefik:v3.6
+    command:
+      - --entrypoints.web.address=:80
+      - --providers.file.filename=/etc/traefik/dynamic.yml
+      - --experimental.localplugins.abuseipdb.modulename=github.com/your-org/abuseipdb-traefik-bouncer
+      - --ping=true
+    ports:
+      - "${TRAEFIK_PORT:-8080}:80"
+    volumes:
+      - .:/plugins-local/src/github.com/your-org/abuseipdb-traefik-bouncer:ro
+      - ./playground/dynamic.yml:/etc/traefik/dynamic.yml:ro
+    healthcheck:
+      test: [CMD, traefik, healthcheck, --ping]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+  whoami:
+    image: traefik/whoami:v1.11

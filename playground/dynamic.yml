@@ -1,0 +1,32 @@
+# Safe offline playground: docker/private traffic passes without an API call.
+# Replace this placeholder with a real secret via your deployment's secret mechanism
+# before using live checks. Keep keys out of labels and source control.
+http:
+  routers:
+    demo:
+      rule: PathPrefix(`/`)
+      entryPoints: [web]
+      middlewares: [bouncer]
+      service: whoami
+    blocked:
+      rule: PathPrefix(`/blocked`)
+      entryPoints: [web]
+      middlewares: [blocked]
+      service: whoami
+  services:
+    whoami:
+      loadBalancer:
+        servers:
+          - url: http://whoami:80
+  middlewares:
+    bouncer:
+      plugin:
+        abuseipdb:
+          apiKey: playground-placeholder
+          useBlacklist: false
+    blocked:
+      plugin:
+        abuseipdb:
+          apiKey: playground-placeholder
+          useBlacklist: false
+          denyCIDRs: ["0.0.0.0/0", "::/0"]
