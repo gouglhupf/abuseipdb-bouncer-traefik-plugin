@@ -23,10 +23,8 @@ http:
       plugin:
         abuseipdb:
           apiKey: playground-placeholder
-          useBlacklist: false
     blocked:
       plugin:
         abuseipdb:
           apiKey: playground-placeholder
-          useBlacklist: false
           denyCIDRs: ["0.0.0.0/0", "::/0"]

@@ -9,40 +9,35 @@ import (
 
 // Config is the data-only configuration decoded by Traefik.
 type Config struct {
-	APIKey                 string   `json:"apiKey,omitempty"`
-	Threshold              int      `json:"threshold,omitempty"`
-	MaxAgeInDays           int      `json:"maxAgeInDays,omitempty"`
-	Verbose                bool     `json:"verbose,omitempty"`
-	UseBlacklist           bool     `json:"useBlacklist,omitempty"`
-	BlacklistMinConfidence int      `json:"blacklistMinConfidence,omitempty"`
-	BlacklistInterval      string   `json:"blacklistInterval,omitempty"`
-	BlacklistLimit         int      `json:"blacklistLimit,omitempty"`
-	CacheTTL               string   `json:"cacheTTL,omitempty"`
-	BlockTTL               string   `json:"blockTTL,omitempty"`
-	ErrorTTL               string   `json:"errorTTL,omitempty"`
-	CacheSize              int      `json:"cacheSize,omitempty"`
-	RequestTimeout         string   `json:"requestTimeout,omitempty"`
-	MaxRetries             int      `json:"maxRetries,omitempty"`
-	FailClosed             bool     `json:"failClosed,omitempty"`
-	AllowCIDRs             []string `json:"allowCIDRs,omitempty"`
-	DenyCIDRs              []string `json:"denyCIDRs,omitempty"`
-	SkipPrivateRanges      bool     `json:"skipPrivateRanges,omitempty"`
-	TrustedProxies         []string `json:"trustedProxies,omitempty"`
-	BlockCategories        []int    `json:"blockCategories,omitempty"`
-	AllowCountries         []string `json:"allowCountries,omitempty"`
-	DenyCountries          []string `json:"denyCountries,omitempty"`
-	ResponseStatus         int      `json:"responseStatus,omitempty"`
-	LogDecision            bool     `json:"logDecision,omitempty"`
+	APIKey            string   `json:"apiKey,omitempty"`
+	Threshold         int      `json:"threshold,omitempty"`
+	MaxAgeInDays      int      `json:"maxAgeInDays,omitempty"`
+	Verbose           bool     `json:"verbose,omitempty"`
+	CacheTTL          string   `json:"cacheTTL,omitempty"`
+	BlockTTL          string   `json:"blockTTL,omitempty"`
+	ErrorTTL          string   `json:"errorTTL,omitempty"`
+	CacheSize         int      `json:"cacheSize,omitempty"`
+	RequestTimeout    string   `json:"requestTimeout,omitempty"`
+	MaxRetries        int      `json:"maxRetries,omitempty"`
+	FailClosed        bool     `json:"failClosed,omitempty"`
+	AllowCIDRs        []string `json:"allowCIDRs,omitempty"`
+	DenyCIDRs         []string `json:"denyCIDRs,omitempty"`
+	SkipPrivateRanges bool     `json:"skipPrivateRanges,omitempty"`
+	TrustedProxies    []string `json:"trustedProxies,omitempty"`
+	BlockCategories   []int    `json:"blockCategories,omitempty"`
+	AllowCountries    []string `json:"allowCountries,omitempty"`
+	DenyCountries     []string `json:"denyCountries,omitempty"`
+	ResponseStatus    int      `json:"responseStatus,omitempty"`
+	LogDecision       string   `json:"logDecision,omitempty"`
 }
 
 // CreateConfig supplies defaults before Traefik decodes user settings.
 func CreateConfig() *Config {
 	return &Config{
-		Threshold: 90, MaxAgeInDays: 90, UseBlacklist: true,
-		BlacklistMinConfidence: 90, BlacklistInterval: "6h", BlacklistLimit: 10000,
+		Threshold: 90, MaxAgeInDays: 90,
 		CacheTTL: "12h", BlockTTL: "1h", ErrorTTL: "1m", CacheSize: 50000,
 		RequestTimeout: "1500ms", MaxRetries: 1, SkipPrivateRanges: true,
-		ResponseStatus: 403, LogDecision: true,
+		ResponseStatus: 403, LogDecision: "all",
 	}
 }
 
@@ -61,18 +56,16 @@ func (c *Config) Validate() error {
 	add(!strings.ContainsAny(c.APIKey, "\r\n"), "apiKey must not contain newlines")
 	add(c.Threshold >= 0 && c.Threshold <= 100, "threshold must be 0..100")
 	add(c.MaxAgeInDays >= 1 && c.MaxAgeInDays <= 365, "maxAgeInDays must be 1..365")
-	add(c.BlacklistMinConfidence >= 25 && c.BlacklistMinConfidence <= 100, "blacklistMinConfidence must be 25..100")
-	add(c.BlacklistLimit >= 1 && c.BlacklistLimit <= 500000, "blacklistLimit must be 1..500000")
 	add(c.CacheSize > 0, "cacheSize must be positive")
 	add(c.MaxRetries >= 0 && c.MaxRetries <= 1, "maxRetries must be 0 or 1")
 	add(c.ResponseStatus >= 400 && c.ResponseStatus <= 599, "responseStatus must be 400..599")
+	add(c.LogDecision == "none" || c.LogDecision == "block" || c.LogDecision == "all", `logDecision must be "none", "block" or "all"`)
 	for _, field := range []struct {
 		name, value string
 		min         time.Duration
 	}{
 		{"cacheTTL", c.CacheTTL, 1}, {"blockTTL", c.BlockTTL, 1},
 		{"errorTTL", c.ErrorTTL, 1}, {"requestTimeout", c.RequestTimeout, 1},
-		{"blacklistInterval", c.BlacklistInterval, 15 * time.Minute},
 	} {
 		d, err := time.ParseDuration(field.value)
 		add(err == nil && d >= field.min, field.name+" is invalid or below its minimum")

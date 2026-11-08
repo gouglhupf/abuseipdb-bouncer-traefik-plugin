@@ -9,8 +9,7 @@ import (
 func testConfig() *Config {
 	c := CreateConfig()
 	c.APIKey = "secret-test-key"
-	c.UseBlacklist = false
-	c.LogDecision = false
+	c.LogDecision = "none"
 	return c
 }
 
@@ -31,9 +30,6 @@ func TestConfig(t *testing.T) {
 	}{
 		{"threshold", func(c *Config) { c.Threshold = 101 }},
 		{"age", func(c *Config) { c.MaxAgeInDays = 0 }},
-		{"blacklist score", func(c *Config) { c.BlacklistMinConfidence = 24 }},
-		{"blacklist limit", func(c *Config) { c.BlacklistLimit = 0 }},
-		{"blacklist interval", func(c *Config) { c.BlacklistInterval = "14m" }},
 		{"ttl", func(c *Config) { c.CacheTTL = "bad" }},
 		{"block ttl", func(c *Config) { c.BlockTTL = "0s" }},
 		{"error ttl", func(c *Config) { c.ErrorTTL = "-1s" }},
@@ -41,6 +37,7 @@ func TestConfig(t *testing.T) {
 		{"cache", func(c *Config) { c.CacheSize = 0 }},
 		{"retries", func(c *Config) { c.MaxRetries = 2 }},
 		{"status", func(c *Config) { c.ResponseStatus = 200 }},
+		{"log decision", func(c *Config) { c.LogDecision = "sometimes" }},
 		{"allow", func(c *Config) { c.AllowCIDRs = []string{"bad"} }},
 		{"deny", func(c *Config) { c.DenyCIDRs = []string{"bad"} }},
 		{"trusted", func(c *Config) { c.TrustedProxies = []string{"1.2.3.4"} }},

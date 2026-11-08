@@ -42,12 +42,6 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 	b.blockTTL, _ = time.ParseDuration(c.BlockTTL)
 	b.errorTTL, _ = time.ParseDuration(c.ErrorTTL)
 	b.timeout, _ = time.ParseDuration(c.RequestTimeout)
-	if c.LogDecision {
-		fmt.Fprintln(os.Stdout, "abuseipdb: hello; live check middleware ready")
-		if c.UseBlacklist {
-			fmt.Fprintln(os.Stdout, "abuseipdb: blacklist snapshots are deferred to M3; using live checks with cache")
-		}
-	}
 	return b, nil
 }
 
@@ -67,7 +61,7 @@ func (b *bouncer) lookup(ctx context.Context, ip string) decision {
 			ttl := b.cacheTTL
 			value := b.fallback()
 			if err != nil {
-				if b.config.LogDecision {
+				if b.config.LogDecision != "none" {
 					// Client errors are deliberately sanitized; never log raw HTTP errors or bodies.
 					fmt.Fprintf(os.Stderr, "abuseipdb: ip=%s lookup=%s\n", ip, err.Error())
 				}
@@ -91,6 +85,18 @@ func (b *bouncer) lookup(ctx context.Context, ip string) decision {
 	}
 }
 
+// logDecision writes the verdict to stdout, honoring the logDecision mode:
+// "all" logs every decision, "block" only denials, "none" stays silent.
+func (b *bouncer) logDecision(d decision, ipText string) {
+	if b.config.LogDecision == "all" || (b.config.LogDecision == "block" && d.blocked) {
+		verdict := "allow"
+		if d.blocked {
+			verdict = "deny"
+		}
+		fmt.Fprintf(os.Stdout, "abuseipdb: ip=%s decision=%s source=%s\n", ipText, verdict, d.source)
+	}
+}
+
 func (b *bouncer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	ip, err := resolveIP(req, b.trusted)
 	d := b.fallback()
@@ -108,21 +114,10 @@ func (b *bouncer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			d = b.lookup(req.Context(), ipText)
 		}
 	}
-	verdict := "allow"
-	if d.blocked {
-		verdict = "deny"
-	}
-	if b.config.LogDecision {
-		fmt.Fprintf(os.Stdout, "abuseipdb: ip=%s decision=%s source=%s\n", ipText, verdict, d.source)
-	}
+	b.logDecision(d, ipText)
 	if !d.blocked {
 		b.next.ServeHTTP(rw, req)
 		return
-	}
-	rw.Header().Set("X-AbuseIPDB-Decision", verdict)
-	rw.Header().Set("X-AbuseIPDB-Source", d.source)
-	if d.hasScore {
-		rw.Header().Set("X-AbuseIPDB-Score", strconv.Itoa(d.score))
 	}
 	http.Error(rw, "Forbidden", b.config.ResponseStatus)
 }

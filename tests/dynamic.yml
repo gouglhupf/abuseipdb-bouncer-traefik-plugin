@@ -27,7 +27,6 @@ http:
       plugin:
         abuseipdb:
           apiKey: integration-secret
-          useBlacklist: false
           trustedProxies: ["0.0.0.0/0", "::/0"]
           allowCIDRs: ["203.0.113.1/32"]
           denyCIDRs: ["203.0.113.0/24"]
@@ -36,7 +35,6 @@ http:
       plugin:
         abuseipdb:
           apiKey: integration-secret
-          useBlacklist: false
           trustedProxies: ["0.0.0.0/0", "::/0"]
           failClosed: true
           maxRetries: 0
@@ -44,7 +42,6 @@ http:
       plugin:
         abuseipdb:
           apiKey: integration-secret
-          useBlacklist: false
           trustedProxies: ["0.0.0.0/0", "::/0"]
           blockCategories: [18]
           maxRetries: 0
