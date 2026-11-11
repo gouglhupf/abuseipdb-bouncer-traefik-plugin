@@ -3,6 +3,7 @@
 [![CI](https://github.com/gouglhupf/abuseipdb-bouncer-traefik-plugin/actions/workflows/ci.yml/badge.svg)](https://github.com/gouglhupf/abuseipdb-bouncer-traefik-plugin/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/gouglhupf/abuseipdb-bouncer-traefik-plugin)](https://github.com/gouglhupf/abuseipdb-bouncer-traefik-plugin/releases)
 [![License](https://img.shields.io/github/license/gouglhupf/abuseipdb-bouncer-traefik-plugin)](LICENSE)
+[![AI:W WRITE](https://img.shields.io/badge/AI-WRITE-grey?style=flat&logoSize=auto&labelColor=13171f)](https://0rwx.com)
 
 A [Traefik v3](https://traefik.io/) middleware plugin that checks client IPs against [AbuseIPDB](https://www.abuseipdb.com/) and blocks abusive ones before they reach your backend. Written in pure Go using only the standard library, so it runs directly in Traefik's Yaegi interpreter — no build step, no dependencies.
 
@@ -130,7 +131,7 @@ make down
 Without Make, run `sh tests/integration.sh`, `docker compose up -d`, or:
 
 ```sh
-docker run --rm -v "$PWD:/src" -w /src golang:1.23-bookworm go test -race ./...
+docker run --rm -v "$PWD:/src" -w /src golang:1.27-bookworm go test -race ./...
 ```
 
 `GO_IMAGE` overrides the unit-test/format/vet image; `TRAEFIK_PORT` overrides the host port. The integration stack has a separate Compose project and removes its containers, network, and certificate volume on exit. Its TLS stub owns the `api.abuseipdb.com` DNS alias **only inside that Docker network**, so the production HTTPS client runs unchanged without contacting AbuseIPDB or using a real key. The integration-only trust-all forwarded-header settings must never be copied into production.

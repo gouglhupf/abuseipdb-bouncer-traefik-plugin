@@ -19,7 +19,7 @@ services:
       stub:
         condition: service_healthy
   stub:
-    image: golang:1.23-bookworm
+    image: golang:1.27-bookworm
     working_dir: /stub
     command: [go, run, main.go]
     volumes:
