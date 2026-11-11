@@ -1,3 +1,3 @@
-module github.com/your-org/abuseipdb-traefik-bouncer
+module github.com/gouglhupf/abuseipdb-bouncer-traefik-plugin
 
 go 1.22

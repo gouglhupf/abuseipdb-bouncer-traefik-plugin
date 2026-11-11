@@ -5,7 +5,7 @@ services:
       - --entrypoints.web.address=:80
       - --entrypoints.web.forwardedheaders.insecure=true
       - --providers.file.filename=/etc/traefik/dynamic.yml
-      - --experimental.localplugins.abuseipdb.modulename=github.com/your-org/abuseipdb-traefik-bouncer
+      - --experimental.localplugins.abuseipdb.modulename=github.com/gouglhupf/abuseipdb-bouncer-traefik-plugin
       - --ping=true
     environment:
       SSL_CERT_FILE: /certs/ca.pem

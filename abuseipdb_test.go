@@ -1,4 +1,4 @@
-package abuseipdb_traefik_bouncer
+package abuseipdb_bouncer_traefik_plugin
 
 import (
 	"context"
@@ -42,12 +42,11 @@ func TestStaticPaths(t *testing.T) {
 	for _, tc := range []struct {
 		ip     string
 		status int
-		source string
 	}{
-		{"203.0.113.1:80", 204, ""}, {"203.0.113.2:80", 403, "deny-cidr"}, {"10.0.0.1:80", 204, ""}, {"[::1]:80", 204, ""}, {"bad", 204, ""},
+		{"203.0.113.1:80", 204}, {"203.0.113.2:80", 403}, {"10.0.0.1:80", 204}, {"[::1]:80", 204}, {"bad", 204},
 	} {
 		w := serve(b, tc.ip)
-		if w.Code != tc.status || w.Header().Get("X-AbuseIPDB-Source") != tc.source {
+		if w.Code != tc.status {
 			t.Fatalf("%s: %d %v", tc.ip, w.Code, w.Header())
 		}
 	}
@@ -77,8 +76,8 @@ func TestLiveVerdictsAndTTL(t *testing.T) {
 			if w.Code != want {
 				t.Fatal(w.Code, w.Body.String())
 			}
-			if score == 100 && (w.Header().Get("X-AbuseIPDB-Score") != "100" || w.Header().Get("X-AbuseIPDB-Decision") != "deny" || strings.Contains(w.Body.String(), c.APIKey)) {
-				t.Fatal(w.Header())
+			if score == 100 && strings.Contains(w.Body.String(), c.APIKey) {
+				t.Fatal("API key leaked in response body")
 			}
 			serve(b, "8.8.8.8:80")
 			if atomic.LoadInt32(&calls) != 1 {

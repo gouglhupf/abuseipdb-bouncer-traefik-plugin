@@ -1,6 +1,6 @@
 displayName: AbuseIPDB Bouncer
 type: middleware
-import: github.com/your-org/abuseipdb-traefik-bouncer
+import: github.com/gouglhupf/abuseipdb-bouncer-traefik-plugin
 summary: Cache-backed AbuseIPDB IP reputation gate for Traefik v3.
 testData:
   apiKey: catalog-validation-placeholder

@@ -1,4 +1,4 @@
-package abuseipdb_traefik_bouncer
+package abuseipdb_bouncer_traefik_plugin
 
 import (
 	"fmt"

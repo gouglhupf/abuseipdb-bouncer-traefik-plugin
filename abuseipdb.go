@@ -1,5 +1,5 @@
-// Package abuseipdb_traefik_bouncer implements a cache-backed AbuseIPDB middleware for Traefik.
-package abuseipdb_traefik_bouncer
+// Package abuseipdb_bouncer_traefik_plugin implements a cache-backed AbuseIPDB middleware for Traefik.
+package abuseipdb_bouncer_traefik_plugin
 
 import (
 	"context"
@@ -7,7 +7,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 )
 

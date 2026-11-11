@@ -1,4 +1,4 @@
-package abuseipdb_traefik_bouncer
+package abuseipdb_bouncer_traefik_plugin
 
 import (
 	"context"
@@ -94,7 +94,7 @@ func (a *apiClient) check(ctx context.Context, ip string) (checkResult, error) {
 		}
 		req.Header.Set("Key", a.key)
 		req.Header.Set("Accept", "application/json")
-		req.Header.Set("User-Agent", "abuseipdb-traefik-bouncer/0.1")
+		req.Header.Set("User-Agent", "abuseipdb-bouncer-traefik-plugin/0.1")
 		resp, requestErr := a.http.Do(req)
 		delay := 100 * time.Millisecond
 		if requestErr == nil {
